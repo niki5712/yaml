@@ -281,7 +281,7 @@ func yaml_emitter_emit_stream_start(emitter *yaml_emitter_t, event *yaml_event_t
 		}
 	}
 	if emitter.best_indent < 2 || emitter.best_indent > 9 {
-		emitter.best_indent = 2
+		emitter.best_indent = 4
 	}
 	if emitter.best_width >= 0 && emitter.best_width <= emitter.best_indent*2 {
 		emitter.best_width = 80

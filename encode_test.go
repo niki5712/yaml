@@ -101,13 +101,13 @@ var marshalTests = []struct {
 		"v:\n- A\n- B\n",
 	}, {
 		map[string][]string{"v": []string{"A", "B\nC"}},
-		"v:\n- A\n- |-\n  B\n  C\n",
+		"v:\n- A\n- |-\n    B\n    C\n",
 	}, {
 		map[string][]interface{}{"v": []interface{}{"A", 1, map[string][]int{"B": []int{2, 3}}}},
-		"v:\n- A\n- 1\n- B:\n  - 2\n  - 3\n",
+		"v:\n- A\n- 1\n-   B:\n    - 2\n    - 3\n",
 	}, {
 		map[string]interface{}{"a": map[interface{}]interface{}{"b": "c"}},
-		"a:\n  b: c\n",
+		"a:\n    b: c\n",
 	}, {
 		map[string]interface{}{"a": "-"},
 		"a: '-'\n",
@@ -129,14 +129,14 @@ var marshalTests = []struct {
 				B string
 			}
 		}{struct{ B string }{"c"}},
-		"a:\n  b: c\n",
+		"a:\n    b: c\n",
 	}, {
 		&struct {
 			A *struct {
 				B string
 			}
 		}{&struct{ B string }{"c"}},
-		"a:\n  b: c\n",
+		"a:\n    b: c\n",
 	}, {
 		&struct {
 			A *struct {
@@ -312,13 +312,13 @@ var marshalTests = []struct {
 		"a: !!binary gIGC\n",
 	}, {
 		map[string]string{"a": strings.Repeat("\x90", 54)},
-		"a: !!binary |\n  " + strings.Repeat("kJCQ", 17) + "kJ\n  CQ\n",
+		"a: !!binary |\n    " + strings.Repeat("kJCQ", 17) + "kJ\n    CQ\n",
 	},
 
 	// Ordered maps.
 	{
 		&yaml.MapSlice{{"b", 2}, {"a", 1}, {"d", 4}, {"c", 3}, {"sub", yaml.MapSlice{{"e", 5}}}},
-		"b: 2\na: 1\nd: 4\nc: 3\nsub:\n  e: 5\n",
+		"b: 2\na: 1\nd: 4\nc: 3\nsub:\n    e: 5\n",
 	},
 
 	// Encode unicode as utf-8 rather than in escaped form.
@@ -466,7 +466,7 @@ var marshalerTests = []struct {
 	data  string
 	value interface{}
 }{
-	{"_:\n  hi: there\n", map[interface{}]interface{}{"hi": "there"}},
+	{"_:\n    hi: there\n", map[interface{}]interface{}{"hi": "there"}},
 	{"_:\n- 1\n- A\n", []interface{}{1, "A"}},
 	{"_: 10\n", 10},
 	{"_: null\n", nil},
