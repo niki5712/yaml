@@ -592,7 +592,7 @@ func yaml_emitter_emit_block_sequence_item(emitter *yaml_emitter_t, event *yaml_
 	if !yaml_emitter_write_indent(emitter) {
 		return false
 	}
-	if !yaml_emitter_write_indicator(emitter, []byte{'-'}, true, false, true) {
+	if !yaml_emitter_write_indicator(emitter, []byte("-  "), true, false, true) {
 		return false
 	}
 	emitter.states = append(emitter.states, yaml_EMIT_BLOCK_SEQUENCE_ITEM_STATE)
