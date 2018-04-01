@@ -44,10 +44,10 @@ var marshalTests = []struct {
 		"v: hi\n",
 	}, {
 		map[string]string{"v": "true"},
-		"v: \"true\"\n",
+		"v: 'true'\n",
 	}, {
 		map[string]string{"v": "false"},
-		"v: \"false\"\n",
+		"v: 'false'\n",
 	}, {
 		map[string]interface{}{"v": true},
 		"v: true\n",
@@ -74,7 +74,7 @@ var marshalTests = []struct {
 		"v: 4294967296\n",
 	}, {
 		map[string]interface{}{"v": "10"},
-		"v: \"10\"\n",
+		"v: '10'\n",
 	}, {
 		map[string]interface{}{"v": 0.1},
 		"v: 0.1\n",
@@ -101,7 +101,7 @@ var marshalTests = []struct {
 		"v: null\n",
 	}, {
 		map[string]interface{}{"v": ""},
-		"v: \"\"\n",
+		"v: ''\n",
 	}, {
 		map[string][]string{"v": []string{"A", "B"}},
 		"v:\n- A\n- B\n",
@@ -306,7 +306,7 @@ var marshalTests = []struct {
 	// with old YAML 1.1 parsers.
 	{
 		map[string]string{"a": "1:1"},
-		"a: \"1:1\"\n",
+		"a: '1:1'\n",
 	},
 
 	// Binary data.
@@ -355,7 +355,7 @@ var marshalTests = []struct {
 	// Ensure timestamp-like strings are quoted.
 	{
 		map[string]string{"a": "2015-02-24T18:19:39Z"},
-		"a: \"2015-02-24T18:19:39Z\"\n",
+		"a: '2015-02-24T18:19:39Z'\n",
 	},
 
 	// Ensure strings containing ": " are quoted (reported as PR #43, but not reproducible).
@@ -582,7 +582,7 @@ func (s *S) TestSortedOutput(c *C) {
 		repr := fmt.Sprint(k)
 		if s, ok := k.(string); ok {
 			if _, err = strconv.ParseFloat(repr, 32); s == "" || err == nil {
-				repr = `"` + repr + `"`
+				repr = `'` + repr + `'`
 			}
 		}
 		index := strings.Index(out, "\n"+repr+":")

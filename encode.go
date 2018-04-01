@@ -301,7 +301,7 @@ func (e *encoder) stringv(tag string, in reflect.Value) {
 	case canUsePlain:
 		style = yaml_PLAIN_SCALAR_STYLE
 	default:
-		style = yaml_DOUBLE_QUOTED_SCALAR_STYLE
+		style = yaml_SINGLE_QUOTED_SCALAR_STYLE
 	}
 	e.emitScalar(s, "", tag, style)
 }
