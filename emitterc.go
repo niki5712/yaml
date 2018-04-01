@@ -412,6 +412,9 @@ func yaml_emitter_emit_document_start(emitter *yaml_emitter_t, event *yaml_event
 				return false
 			}
 		}
+		if !put_break(emitter) {
+			return false
+		}
 		if !yaml_emitter_flush(emitter) {
 			return false
 		}
