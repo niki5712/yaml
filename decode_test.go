@@ -25,6 +25,12 @@ var unmarshalTests = []struct {
 	{
 		"{}", &struct{}{},
 	}, {
+		"leading zero: 08765",
+		map[string]string{"leading zero": "08765"},
+	}, {
+		"leading zero: 08765",
+		map[string]interface{}{"leading zero": "08765"},
+	}, {
 		"v: hi",
 		map[string]string{"v": "hi"},
 	}, {

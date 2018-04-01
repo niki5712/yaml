@@ -81,7 +81,18 @@ func resolvableTag(tag string) bool {
 	return false
 }
 
-var yamlStyleFloat = regexp.MustCompile(`^[-+]?[0-9]*\.?[0-9]+([eE][-+][0-9]+)?$`)
+var yamlStyleFloat = regexp.MustCompile(
+	`^(?:[-+]?(?:[0-9][0-9_]*)\.[0-9_]*(?:[eE][-+][0-9]+)?`+
+	`|[-+]?\.[0-9_]+(?:[eE][-+][0-9]+)?`+
+	`|[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+\.[0-9_]*`+
+	`|[-+]?\.(?:inf|Inf|INF)`+
+	`|\.(?:nan|NaN|NAN))$`)
+var yamlStyleInt = regexp.MustCompile(
+	`^(?:[-+]?0b[0-1_]+`+
+	`|[-+]?0[0-7_]+`+
+	`|[-+]?(?:0|[1-9][0-9_]*)`+
+	`|[-+]?0x[0-9a-fA-F_]+`+
+	`|[-+]?[1-9][0-9_]*(?::[0-5]?[0-9])+)$`)
 
 func resolve(tag string, in string) (rtag string, out interface{}) {
 	if !resolvableTag(tag) {
@@ -131,9 +142,12 @@ func resolve(tag string, in string) (rtag string, out interface{}) {
 
 		case '.':
 			// Not in the map, so maybe a normal float.
-			floatv, err := strconv.ParseFloat(in, 64)
-			if err == nil {
-				return yaml_FLOAT_TAG, floatv
+			if yamlStyleFloat.MatchString(in) {
+				plain := strings.Replace(in, "_", "", -1)
+				floatv, err := strconv.ParseFloat(plain, 64)
+				if err == nil {
+					return yaml_FLOAT_TAG, floatv
+				}
 			}
 
 		case 'D', 'S':
@@ -148,26 +162,14 @@ func resolve(tag string, in string) (rtag string, out interface{}) {
 			}
 
 			plain := strings.Replace(in, "_", "", -1)
-			intv, err := strconv.ParseInt(plain, 0, 64)
-			if err == nil {
-				if intv == int64(int(intv)) {
-					return yaml_INT_TAG, int(intv)
-				} else {
-					return yaml_INT_TAG, intv
-				}
-			}
-			uintv, err := strconv.ParseUint(plain, 0, 64)
-			if err == nil {
-				return yaml_INT_TAG, uintv
-			}
-			if yamlStyleFloat.MatchString(plain) {
+			if yamlStyleFloat.MatchString(in) {
 				floatv, err := strconv.ParseFloat(plain, 64)
 				if err == nil {
 					return yaml_FLOAT_TAG, floatv
 				}
 			}
-			if strings.HasPrefix(plain, "0b") {
-				intv, err := strconv.ParseInt(plain[2:], 2, 64)
+			if yamlStyleInt.MatchString(in) {
+				intv, err := strconv.ParseInt(plain, 0, 64)
 				if err == nil {
 					if intv == int64(int(intv)) {
 						return yaml_INT_TAG, int(intv)
@@ -175,17 +177,35 @@ func resolve(tag string, in string) (rtag string, out interface{}) {
 						return yaml_INT_TAG, intv
 					}
 				}
-				uintv, err := strconv.ParseUint(plain[2:], 2, 64)
+				uintv, err := strconv.ParseUint(plain, 0, 64)
 				if err == nil {
 					return yaml_INT_TAG, uintv
 				}
-			} else if strings.HasPrefix(plain, "-0b") {
-				intv, err := strconv.ParseInt("-" + plain[3:], 2, 64)
+				floatv, err := strconv.ParseFloat(plain, 64)
 				if err == nil {
-					if true || intv == int64(int(intv)) {
-						return yaml_INT_TAG, int(intv)
-					} else {
-						return yaml_INT_TAG, intv
+					return yaml_FLOAT_TAG, floatv
+				}
+				if strings.HasPrefix(plain, "0b") {
+					intv, err := strconv.ParseInt(plain[2:], 2, 64)
+					if err == nil {
+						if intv == int64(int(intv)) {
+							return yaml_INT_TAG, int(intv)
+						} else {
+							return yaml_INT_TAG, intv
+						}
+					}
+					uintv, err := strconv.ParseUint(plain[2:], 2, 64)
+					if err == nil {
+						return yaml_INT_TAG, uintv
+					}
+				} else if strings.HasPrefix(plain, "-0b") {
+					intv, err := strconv.ParseInt("-"+plain[3:], 2, 64)
+					if err == nil {
+						if intv == int64(int(intv)) {
+							return yaml_INT_TAG, int(intv)
+						} else {
+							return yaml_INT_TAG, intv
+						}
 					}
 				}
 			}
