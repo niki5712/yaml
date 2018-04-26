@@ -327,10 +327,10 @@ var marshalTests = []struct {
 		"b: 2\na: 1\nd: 4\nc: 3\nsub:\n    e: 5\n",
 	},
 
-	// Encode unicode as utf-8 rather than in escaped form.
+	// Encode unicode in escaped form rather than as utf-8.
 	{
 		map[string]string{"a": "你好"},
-		"a: 你好\n",
+		"a: \"\\u4F60\\u597D\"\n",
 	},
 
 	// Support encoding.TextMarshaler.
@@ -371,7 +371,7 @@ var marshalTests = []struct {
 	},
 	{
 		map[string]string{"a": "你好 #comment"},
-		"a: '你好 #comment'\n",
+		"a: \"\\u4F60\\u597D #comment\"\n",
 	},
 }
 

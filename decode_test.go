@@ -675,6 +675,12 @@ var unmarshalTests = []struct {
 		&struct{ A []int }{[]int{}},
 	},
 
+	// Unicode in escaped form
+	{
+		"\"\\u0432\\u043E\\u0434\\u043A\\u0430\": vodka",
+		M{"водка": "vodka"},
+	},
+
 	// UTF-16-LE
 	{
 		"\xff\xfe\xf1\x00o\x00\xf1\x00o\x00:\x00 \x00v\x00e\x00r\x00y\x00 \x00y\x00e\x00s\x00\n\x00",
