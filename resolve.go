@@ -93,6 +93,68 @@ var yamlStyleInt = regexp.MustCompile(
 	`|[-+]?(?:0|[1-9][0-9_]*)`+
 	`|[-+]?0x[0-9a-fA-F_]+`+
 	`|[-+]?[1-9][0-9_]*(?::[0-5]?[0-9])+)$`)
+var yamlStyleTimestamp = regexp.MustCompile(
+`^(?:[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]`+
+	`|[0-9][0-9][0-9][0-9]-[0-9][0-9]?-[0-9][0-9]?`+
+	`(?:[Tt]|[ \t]+)[0-9][0-9]?`+
+	`:[0-9][0-9]:[0-9][0-9](?:\.[0-9]*)?`+
+	`(?:[ \t]*(?:Z|[-+][0-9][0-9]?(?::[0-9][0-9])?))?)$`)
+
+func resolveLikePython(tag string, in string) (rtag string) {
+	if !resolvableTag(tag) {
+		return tag
+	}
+
+	defer func() {
+		switch tag {
+		case "", rtag, yaml_STR_TAG, yaml_BINARY_TAG:
+			return
+		case yaml_FLOAT_TAG:
+			if rtag == yaml_INT_TAG {
+				rtag = yaml_FLOAT_TAG
+				return
+			}
+		}
+		failf("cannot decode %s `%s` as a %s", shortTag(rtag), in, shortTag(tag))
+	}()
+
+	// Any data is accepted as a !!str or !!binary.
+	// Otherwise, the prefix is enough of a hint about what it might be.
+	hint := byte('N')
+	if in != "" {
+		hint = resolveTable[in[0]]
+	}
+	if hint != 0 && tag != yaml_STR_TAG && tag != yaml_BINARY_TAG {
+		// Handle things we can lookup in a map.
+		if item, ok := resolveMap[in]; ok {
+			return item.tag
+		}
+
+		switch hint {
+		case 'M':
+			// We've already checked the map above.
+		case '.':
+			if yamlStyleFloat.MatchString(in) {
+				return yaml_FLOAT_TAG
+			}
+		case 'D', 'S':
+			if yamlStyleFloat.MatchString(in) {
+				return yaml_FLOAT_TAG
+			}
+			if yamlStyleInt.MatchString(in) {
+				return yaml_INT_TAG
+			}
+			if tag == "" || tag == yaml_TIMESTAMP_TAG {
+				if yamlStyleTimestamp.MatchString(in) {
+					return yaml_TIMESTAMP_TAG
+				}
+			}
+		default:
+			panic("resolveTable item not yet handled: " + string(rune(hint)) + " (with " + in + ")")
+		}
+	}
+	return yaml_STR_TAG
+}
 
 func resolve(tag string, in string) (rtag string, out interface{}) {
 	if !resolvableTag(tag) {

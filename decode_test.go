@@ -31,6 +31,12 @@ var unmarshalTests = []struct {
 		"leading zero: 08765",
 		map[string]interface{}{"leading zero": "08765"},
 	}, {
+		"sid: '0x014ea8886b841c4ca1f7ed32489bbf62'",
+		map[string]string{"sid": "0x014ea8886b841c4ca1f7ed32489bbf62"},
+	}, {
+		"sid: '0x014ea8886b841c4ca1f7ed32489bbf62'",
+		map[string]interface{}{"sid": "0x014ea8886b841c4ca1f7ed32489bbf62"},
+	}, {
 		"v: hi",
 		map[string]string{"v": "hi"},
 	}, {

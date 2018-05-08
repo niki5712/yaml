@@ -37,6 +37,12 @@ var marshalTests = []struct {
 		map[string]interface{}{"leading zero": "08765"},
 		"leading zero: 08765\n",
 	}, {
+		map[string]string{"sid": "0x014ea8886b841c4ca1f7ed32489bbf62"},
+		"sid: '0x014ea8886b841c4ca1f7ed32489bbf62'\n",
+	}, {
+		map[string]interface{}{"sid": "0x014ea8886b841c4ca1f7ed32489bbf62"},
+		"sid: '0x014ea8886b841c4ca1f7ed32489bbf62'\n",
+	}, {
 		map[string]string{"v": "hi"},
 		"v: hi\n",
 	}, {

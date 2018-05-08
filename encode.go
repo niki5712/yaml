@@ -289,7 +289,7 @@ func (e *encoder) stringv(tag string, in reflect.Value) {
 		// Check to see if it would resolve to a specific
 		// tag when encoded unquoted. If it doesn't,
 		// there's no need to quote it.
-		rtag, _ := resolve("", s)
+		rtag := resolveLikePython("", s)
 		canUsePlain = rtag == yaml_STR_TAG && !isBase60Float(s)
 	}
 	// Note: it's possible for user code to emit invalid YAML
