@@ -379,6 +379,23 @@ var marshalTests = []struct {
 		map[string]string{"a": "你好 #comment"},
 		"a: \"\\u4F60\\u597D #comment\"\n",
 	},
+	{
+		map[string]string{
+			"Description": "The FDPHOST service hosts the Function Discovery (FD) network discovery" +
+				" providers. These FD providers supply network discovery services for the Simple" +
+				" Services Discovery Protocol (SSDP) and Web Services – Discovery (WS-D)" +
+				" protocol. Stopping or disabling the FDPHOST service will disable network discovery" +
+				" for these protocols when using FD. When this service is unavailable, network" +
+				" services using FD and relying on these discovery protocols will be unable to" +
+				" find network devices or resources."},
+		"Description: \"The FDPHOST service hosts the Function Discovery (FD) network discovery\\\n" +
+			"    \\ providers. These FD providers supply network discovery services for the Simple\\\n" +
+			"    \\ Services Discovery Protocol (SSDP) and Web Services \\u2013 Discovery (WS-D)\\\n" +
+			"    \\ protocol. Stopping or disabling the FDPHOST service will disable network discovery\\\n" +
+			"    \\ for these protocols when using FD. When this service is unavailable, network\\\n" +
+			"    \\ services using FD and relying on these discovery protocols will be unable to\\\n" +
+			"    \\ find network devices or resources.\"\n",
+	},
 }
 
 func (s *S) TestMarshal(c *C) {

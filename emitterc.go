@@ -1519,16 +1519,19 @@ func yaml_emitter_write_double_quoted_scalar(emitter *yaml_emitter_t, value []by
 			spaces = false
 		} else if is_space(value, i) {
 			if allow_breaks && !spaces && emitter.column > emitter.best_width && i > 0 && i < len(value)-1 {
+				if !put(emitter, '\\') {
+					return false
+				}
 				if !yaml_emitter_write_indent(emitter) {
 					return false
 				}
-				if is_space(value, i+1) {
+				if is_space(value, i) {
 					if !put(emitter, '\\') {
 						return false
 					}
 				}
-				i += width(value[i])
-			} else if !write(emitter, value, &i) {
+			}
+			if !write(emitter, value, &i) {
 				return false
 			}
 			spaces = true
