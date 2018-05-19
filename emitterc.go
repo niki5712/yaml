@@ -1427,120 +1427,124 @@ func yaml_emitter_write_single_quoted_scalar(emitter *yaml_emitter_t, value []by
 }
 
 func yaml_emitter_write_double_quoted_scalar(emitter *yaml_emitter_t, value []byte, allow_breaks bool) bool {
-	spaces := false
 	if !yaml_emitter_write_indicator(emitter, []byte{'"'}, true, false, false) {
 		return false
 	}
 
-	for i := 0; i < len(value); {
-		if !is_printable(value, i) || (!emitter.unicode && !is_ascii(value, i)) ||
-			is_bom(value, i) || is_break(value, i) ||
-			value[i] == '"' || value[i] == '\\' {
-
-			octet := value[i]
-
-			var w int
-			var v rune
-			switch {
-			case octet&0x80 == 0x00:
-				w, v = 1, rune(octet&0x7F)
-			case octet&0xE0 == 0xC0:
-				w, v = 2, rune(octet&0x1F)
-			case octet&0xF0 == 0xE0:
-				w, v = 3, rune(octet&0x0F)
-			case octet&0xF8 == 0xF0:
-				w, v = 4, rune(octet&0x07)
-			}
-			for k := 1; k < w; k++ {
-				octet = value[i+k]
-				v = (v << 6) + (rune(octet) & 0x3F)
-			}
-			i += w
-
-			if !put(emitter, '\\') {
-				return false
-			}
-
-			var ok bool
-			switch v {
-			case 0x00:
-				ok = put(emitter, '0')
-			case 0x07:
-				ok = put(emitter, 'a')
-			case 0x08:
-				ok = put(emitter, 'b')
-			case 0x09:
-				ok = put(emitter, 't')
-			case 0x0A:
-				ok = put(emitter, 'n')
-			case 0x0b:
-				ok = put(emitter, 'v')
-			case 0x0c:
-				ok = put(emitter, 'f')
-			case 0x0d:
-				ok = put(emitter, 'r')
-			case 0x1b:
-				ok = put(emitter, 'e')
-			case 0x22:
-				ok = put(emitter, '"')
-			case 0x5c:
-				ok = put(emitter, '\\')
-			case 0x85:
-				ok = put(emitter, 'N')
-			case 0xA0:
-				ok = put(emitter, '_')
-			case 0x2028:
-				ok = put(emitter, 'L')
-			case 0x2029:
-				ok = put(emitter, 'P')
-			default:
-				if v <= 0xFF {
-					ok = put(emitter, 'x')
-					w = 2
-				} else if v <= 0xFFFF {
-					ok = put(emitter, 'u')
-					w = 4
-				} else {
-					ok = put(emitter, 'U')
-					w = 8
-				}
-				for k := (w - 1) * 4; ok && k >= 0; k -= 4 {
-					digit := byte((v >> uint(k)) & 0x0F)
-					if digit < 10 {
-						ok = put(emitter, digit+'0')
-					} else {
-						ok = put(emitter, digit+'A'-10)
-					}
+	for start, end, endToStart, chw := 0, 0, 0, 1; end <= len(value); {
+		if end == len(value) || !is_printable(value, end) || (!emitter.unicode && !is_ascii(value, end)) ||
+			is_bom(value, end) || is_break(value, end) ||
+			value[end] == '"' || value[end] == '\\' {
+			for ; start < end; endToStart-- {
+				if !write(emitter, value, &start) {
+					return false
 				}
 			}
-			if !ok {
-				return false
-			}
-			spaces = false
-		} else if is_space(value, i) {
-			if allow_breaks && !spaces && emitter.column > emitter.best_width && i > 0 && i < len(value)-1 {
+			if end < len(value) {
+				octet := value[end]
+
+				var v rune
+				switch {
+				case octet&0x80 == 0x00:
+					chw, v = 1, rune(octet&0x7F)
+				case octet&0xE0 == 0xC0:
+					chw, v = 2, rune(octet&0x1F)
+				case octet&0xF0 == 0xE0:
+					chw, v = 3, rune(octet&0x0F)
+				case octet&0xF8 == 0xF0:
+					chw, v = 4, rune(octet&0x07)
+				}
+				for k := 1; k < chw; k++ {
+					octet = value[end+k]
+					v = (v << 6) + (rune(octet) & 0x3F)
+				}
+
 				if !put(emitter, '\\') {
 					return false
 				}
-				if !yaml_emitter_write_indent(emitter) {
-					return false
-				}
-				if is_space(value, i) {
-					if !put(emitter, '\\') {
-						return false
+
+				var ok bool
+				switch v {
+				case 0x00:
+					ok = put(emitter, '0')
+				case 0x07:
+					ok = put(emitter, 'a')
+				case 0x08:
+					ok = put(emitter, 'b')
+				case 0x09:
+					ok = put(emitter, 't')
+				case 0x0A:
+					ok = put(emitter, 'n')
+				case 0x0b:
+					ok = put(emitter, 'v')
+				case 0x0c:
+					ok = put(emitter, 'f')
+				case 0x0d:
+					ok = put(emitter, 'r')
+				case 0x1b:
+					ok = put(emitter, 'e')
+				case 0x22:
+					ok = put(emitter, '"')
+				case 0x5c:
+					ok = put(emitter, '\\')
+				case 0x85:
+					ok = put(emitter, 'N')
+				case 0xA0:
+					ok = put(emitter, '_')
+				case 0x2028:
+					ok = put(emitter, 'L')
+				case 0x2029:
+					ok = put(emitter, 'P')
+				default:
+					var w int
+					if v <= 0xFF {
+						ok = put(emitter, 'x')
+						w = 2
+					} else if v <= 0xFFFF {
+						ok = put(emitter, 'u')
+						w = 4
+					} else {
+						ok = put(emitter, 'U')
+						w = 8
+					}
+					for k := (w - 1) * 4; ok && k >= 0; k -= 4 {
+						digit := byte((v >> uint(k)) & 0x0F)
+						if digit < 10 {
+							ok = put(emitter, digit+'0')
+						} else {
+							ok = put(emitter, digit+'A'-10)
+						}
 					}
 				}
+				if !ok {
+					return false
+				}
+				start = end + chw
+				endToStart--
 			}
-			if !write(emitter, value, &i) {
-				return false
-			}
-			spaces = true
-		} else {
-			if !write(emitter, value, &i) {
-				return false
-			}
-			spaces = false
 		}
+		if end > 0 && end < len(value) - chw && (is_space(value, end) || start >= end) &&
+			emitter.column + endToStart > emitter.best_width && allow_breaks {
+			for ; start < end; endToStart-- {
+				if !write(emitter, value, &start) {
+					return false
+				}
+			}
+			if !put(emitter, '\\') {
+				return false
+			}
+			if !yaml_emitter_write_indent(emitter) {
+				return false
+			}
+			if is_space(value, start) {
+				if !put(emitter, '\\') {
+					return false
+				}
+			}
+		}
+		end += chw
+		endToStart++
+		chw = 1
 	}
 	if !yaml_emitter_write_indicator(emitter, []byte{'"'}, false, false, false) {
 		return false

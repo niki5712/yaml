@@ -396,6 +396,22 @@ var marshalTests = []struct {
 			"    \\ services using FD and relying on these discovery protocols will be unable to\\\n" +
 			"    \\ find network devices or resources.\"\n",
 	},
+	{
+		map[string]string{"MicrosoftOffice2010": "Microsoft Office профессиональный 2010"},
+		"MicrosoftOffice2010: \"Microsoft Office \\u043F\\u0440\\u043E\\u0444\\u0435\\u0441\\u0441\\u0438\\\n" +
+			"    \\u043E\\u043D\\u0430\\u043B\\u044C\\u043D\\u044B\\u0439 2010\"\n",
+	},
+	{
+		map[string]string{"Simple services": "단순 TCPIP 서비스(예: Echo, Daytime 등)"},
+		"Simple services: \"\\uB2E8\\uC21C TCPIP \\uC11C\\uBE44\\uC2A4(\\uC608: Echo, Daytime \\uB4F1\\\n" +
+			"    )\"\n",
+	},
+	{
+		map[string]string{
+			"Russian proverb": "Редко, да метко. Раз, да горазд."},
+		"Russian proverb: \"\\u0420\\u0435\\u0434\\u043A\\u043E, \\u0434\\u0430 \\u043C\\u0435\\u0442\\u043A\\\n" +
+			"    \\u043E. \\u0420\\u0430\\u0437, \\u0434\\u0430 \\u0433\\u043E\\u0440\\u0430\\u0437\\u0434.\"\n",
+	},
 }
 
 func (s *S) TestMarshal(c *C) {
