@@ -37,6 +37,9 @@ var unmarshalTests = []struct {
 		"sid: '0x014ea8886b841c4ca1f7ed32489bbf62'",
 		map[string]interface{}{"sid": "0x014ea8886b841c4ca1f7ed32489bbf62"},
 	}, {
+		"upper y: Y",
+		map[string]interface{}{"upper y": "Y"},
+	}, {
 		"v: hi",
 		map[string]string{"v": "hi"},
 	}, {
@@ -107,9 +110,6 @@ var unmarshalTests = []struct {
 
 	// Bools from spec
 	{
-		"canonical: y",
-		map[string]interface{}{"canonical": true},
-	}, {
 		"answer: NO",
 		map[string]interface{}{"answer": false},
 	}, {
@@ -268,7 +268,7 @@ var unmarshalTests = []struct {
 			B int "a"
 		}{1},
 	}, {
-		"a: y",
+		"a: yes",
 		&struct{ A bool }{true},
 	},
 
